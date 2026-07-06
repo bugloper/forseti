@@ -22,11 +22,20 @@ module Forseti
       private
 
       def evaluate_requirement(requirement)
-        if requirement.kind == :attestable
-          evaluate_attestable(requirement)
-        else
-          evaluate_checkable(requirement)
-        end
+        return evaluate_attestable(requirement) if requirement.kind == :attestable
+
+        result = evaluate_checkable(requirement)
+        return result if result.met? || !requirement.or_attested?
+
+        # or_attested fallback (ADR 006 §7): a valid attestation satisfies the
+        # requirement when machine evidence didn't — visibly, as an attestation.
+        attestation = @attestations.for(@policy.key, requirement.key)
+        return result unless attestation&.valid?
+
+        RequirementResult.new(requirement, status: :met, attestation: attestation,
+                                           evidence: result.evidence +
+                                             ["Attested by #{attestation.attested_by} " \
+                                              "on #{attestation.attested_on} (machine evidence inconclusive)"])
       end
 
       def evaluate_attestable(requirement)

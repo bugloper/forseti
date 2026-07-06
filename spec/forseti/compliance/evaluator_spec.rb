@@ -150,6 +150,53 @@ RSpec.describe Forseti::Compliance::Evaluator do
     end
   end
 
+  describe "or_attested fallback (ADR 006)" do
+    let(:policy) do
+      build_policy do |p|
+        p.requirement :consent, title: "C", article: "7",
+                                verify: -> { false }, evidence: "flag", or_attested: true
+      end
+    end
+    let(:attestations) do
+      Forseti::Compliance::Attestations.new(
+        "test" => { "consent" => { "attested_by" => "jane@corp.com",
+                                   "attested_on" => Date.new(2026, 7, 1) } }
+      )
+    end
+
+    it "lets a valid attestation satisfy a failed checkable requirement, visibly" do
+      result = evaluate(policy, attestations: attestations).requirement_results.first
+
+      expect(result.status).to eq(:met)
+      expect(result).to be_attested
+      expect(result.evidence.join).to include("machine evidence inconclusive")
+    end
+
+    it "prefers machine evidence when it passes" do
+      passing = build_policy do |p|
+        p.requirement :consent, title: "C", article: "7",
+                                verify: -> { true }, evidence: "flag", or_attested: true
+      end
+
+      result = evaluate(passing, attestations: attestations).requirement_results.first
+
+      expect(result.status).to eq(:met)
+      expect(result).not_to be_attested
+    end
+
+    it "stays unmet without a valid attestation" do
+      expect(evaluate(policy).requirement_results.first.status).to eq(:unmet)
+    end
+
+    it "does not apply to requirements without the flag" do
+      strict = build_policy do |p|
+        p.requirement :consent, title: "C", article: "7", verify: -> { false }, evidence: "flag"
+      end
+
+      expect(evaluate(strict, attestations: attestations).requirement_results.first.status).to eq(:unmet)
+    end
+  end
+
   describe "policy scoring" do
     it "scores met/(met+unmet) and excludes unverified, with the disclaimer in to_h" do
       policy = build_policy do |p|

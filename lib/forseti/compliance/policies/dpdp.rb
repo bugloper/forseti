@@ -11,7 +11,12 @@ module Forseti
                         version: "No. 22 of 2023") do |p|
             p.requirement :notice_and_consent,
                           article: "§5–6",
-                          title: "Notice is given and consent obtained before processing"
+                          title: "Notice is given and consent obtained before processing",
+                          verify: -> { Forseti.config.consent.enabled? },
+                          evidence: "config.consent.enabled?",
+                          or_attested: true,
+                          remediation: "Enable config.consent.enable! and record consent through " \
+                                       "Forseti::Consent, or attest to your external consent system."
 
             p.requirement :security_safeguards,
                           article: "§8(5)",

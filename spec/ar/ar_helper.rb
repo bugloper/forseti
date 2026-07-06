@@ -25,8 +25,21 @@ ActiveRecord::Schema.define do
     t.datetime :created_at, null: false
   end
 
+  create_table :forseti_consent_records do |t|
+    t.string :subject_type, null: false
+    t.bigint :subject_id, null: false
+    t.string :purpose, null: false
+    t.string :action, null: false
+    t.string :policy_version
+    t.json :metadata
+    t.string :ip_address
+    t.datetime :created_at, null: false
+  end
+
   create_table :users do |t|
     t.string :name
+    t.datetime :deactivated_at
+    t.datetime :created_at
   end
 end
 

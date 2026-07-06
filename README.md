@@ -164,6 +164,41 @@ closed), every event also fires the `audit.forseti` notification, and the
 `audit.storage` doctor check catches a pending migration before your trail
 silently drops events.
 
+## Consent & Retention
+
+```bash
+bin/rails generate forseti:consent && bin/rails db:migrate
+```
+
+```ruby
+Forseti::Consent.grant(user, :marketing_emails, policy_version: "2026-03")
+Forseti::Consent.granted?(user, :marketing_emails, policy_version: "2026-04") # => false → re-consent
+Forseti::Consent.withdraw(user, :marketing_emails)
+Forseti::Consent.history(user, :marketing_emails)   # the evidence, append-only
+```
+
+Consent records are append-only — every grant and withdrawal is preserved
+with purpose, policy version, timestamp, and request context, and each change
+lands in the audit trail. A version-specific `granted?` returning false is
+your re-consent trigger after policy text changes. **Never point a retention
+policy at consent records: that history is legal evidence.**
+
+```ruby
+config.retention.policy :stale_audit_events,
+                        model: "Forseti::AuditEvent",
+                        keep_for: 2.years, timestamp: :occurred_at, strategy: :delete
+config.retention.policy :abandoned_carts,
+                        model: "Cart", keep_for: 90.days,
+                        scope: ->(carts) { carts.where(completed_at: nil) }
+```
+
+`bin/rails forseti:retention:preview` shows what would be deleted without
+deleting; `forseti:retention:run` prunes (schedule it via cron or a recurring
+job) and records a `retention_pruned` audit event per policy — deletion is
+itself a compliance action. `strategy: :delete` is the deliberate path past
+the audit trail's append-only guard; `:destroy` (default) runs callbacks and
+dependents for user-ish data.
+
 ## Compliance
 
 ```ruby
@@ -202,7 +237,7 @@ passing. Custom org policies plug into the same engine via
 | 3 | PII registry, Privacy (filtering, redaction) | ✅ done |
 | 4 | Audit trail (sinks, append-only storage, `forseti:audit`) | ✅ done |
 | 5 | Compliance engine (GDPR, CCPA, LGPD, DPDP + attestations) | ✅ done |
-| 6 | Consent & Retention | 🔜 next |
+| 6 | Consent & Retention (provable consent, declarative pruning) | ✅ done |
 
 ## Requirements
 

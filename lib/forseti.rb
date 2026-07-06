@@ -2,7 +2,9 @@
 
 require "active_support"
 require "active_support/core_ext/enumerable"
+require "active_support/core_ext/integer/time"
 require "active_support/core_ext/module/delegation"
+require "active_support/core_ext/numeric/time"
 require "active_support/core_ext/object/blank"
 require "zeitwerk"
 
@@ -103,6 +105,8 @@ Forseti::Configuration.register_module(:security, "Forseti::Security::Config")
 Forseti::Configuration.register_module(:privacy, "Forseti::Privacy::Config")
 Forseti::Configuration.register_module(:audit, "Forseti::Audit::Config")
 Forseti::Configuration.register_module(:compliance, "Forseti::Compliance::Config")
+Forseti::Configuration.register_module(:consent, "Forseti::Consent::Config")
+Forseti::Configuration.register_module(:retention, "Forseti::Retention::Config")
 
 Forseti.loader = loader
 

@@ -56,6 +56,30 @@ Forseti.configure do |config|
   # and include Forseti::Audit::Controller in ApplicationController to fill
   # actor/ip/request context automatically.
 
+  # == Consent =================================================================
+  # Provable, versioned, withdrawable consent. Requires storage:
+  # `bin/rails generate forseti:consent && bin/rails db:migrate`.
+  #
+  # config.consent.enable!
+  # config.consent.purposes = %i[marketing_emails analytics]
+  #
+  # Then: Forseti::Consent.grant(user, :marketing_emails, policy_version: "2026-03")
+  #       Forseti::Consent.granted?(user, :marketing_emails, policy_version: "2026-03")
+  #       Forseti::Consent.withdraw(user, :marketing_emails)
+
+  # == Retention ===============================================================
+  # Storage limitation: declare how long data lives; preview before you prune.
+  # Schedule `bin/rails forseti:retention:run` via cron/solid_queue.
+  # NEVER point a policy at forseti_consent_records — that history is legal
+  # evidence.
+  #
+  # config.retention.policy :stale_audit_events,
+  #                         model: "Forseti::AuditEvent",
+  #                         keep_for: 2.years, timestamp: :occurred_at, strategy: :delete
+  # config.retention.policy :abandoned_carts,
+  #                         model: "Cart", keep_for: 90.days,
+  #                         scope: ->(carts) { carts.where(completed_at: nil) }
+
   # == Compliance ==============================================================
   # Map your posture to regulations. Machine-checkable requirements are
   # verified against the live app; everything else needs an explicit human

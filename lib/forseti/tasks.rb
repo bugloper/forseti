@@ -57,4 +57,37 @@ namespace :forseti do
       puts "#{check.id.ljust(32)} [#{check.severity}]#{flags} #{check.title}"
     end
   end
+
+  namespace :retention do
+    desc "Dry run: show what each retention policy would delete (deletes nothing)"
+    task preview: :environment do
+      results = Forseti::Retention.preview
+      if results.empty?
+        puts "No retention policies declared. Add config.retention.policy(...) to the initializer."
+        next
+      end
+
+      results.each do |result|
+        detail = result[:error] ? "ERROR: #{result[:error]}" : "#{result[:eligible]} eligible"
+        puts "#{result[:policy].to_s.ljust(32)} #{detail}"
+      end
+    end
+
+    desc "Prune all retention policies (schedule via cron/solid_queue; audits each run)"
+    task run: :environment do
+      results = Forseti::Retention.run
+      if results.empty?
+        puts "No retention policies declared. Add config.retention.policy(...) to the initializer."
+        next
+      end
+
+      failed = false
+      results.each do |result|
+        detail = result[:error] ? "ERROR: #{result[:error]}" : "#{result[:deleted]} deleted"
+        failed ||= result.key?(:error)
+        puts "#{result[:policy].to_s.ljust(32)} #{detail}"
+      end
+      exit 1 if failed
+    end
+  end
 end

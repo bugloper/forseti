@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 6 — Consent & Retention (ADR 006). Consent: append-only
+  `Forseti::ConsentRecord` history (purpose, policy version, request
+  context), `Forseti::Consent.grant/withdraw/granted?/history` with
+  version-aware re-consent detection, declared-purpose validation, automatic
+  audit events, and the `forseti:consent` generator. Retention: declarative
+  `config.retention.policy` rules (keep_for horizon, custom timestamp,
+  scopes, `:destroy`/`:delete` strategies), `forseti:retention:preview`
+  (dry-run) and `forseti:retention:run` tasks with per-policy error
+  isolation and `retention_pruned` audit events — the deliberate pruning
+  path past the audit trail's append-only guard.
+- Compliance requirements can now declare `or_attested:`: machine evidence
+  or a valid attestation satisfies them, visibly labeled. GDPR
+  `consent_management` and the new `storage_limitation` (Art. 5(1)(e)), plus
+  DPDP `notice_and_consent`, now verify Forseti's consent/retention config.
+- `consent.storage` scanner check.
+
 - Phase 5 — Compliance engine (ADR 005): policies as versioned requirement
   sets mapped to legal controls, with GDPR (reference implementation), CCPA,
   LGPD, and DPDP built in and `Forseti::Compliance.define_policy` for custom

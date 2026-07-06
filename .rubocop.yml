@@ -32,6 +32,7 @@ Naming/PredicateMethod:
 RSpec/DescribeClass:
   Exclude:
     - spec/ar/**/*
+    - spec/forseti/consent_config_spec.rb
     - spec/forseti/zeitwerk_spec.rb
     - spec/forseti/scanner/checks_spec.rb
     - spec/forseti/scanner/checks_awareness_spec.rb
@@ -61,6 +62,7 @@ Metrics/AbcSize:
   Max: 22
   Exclude:
     - spec/**/*
+    - lib/forseti/compliance/policies/**/* # declarations, not logic
 
 # Keyword arguments are self-documenting; the count limit targets positional.
 Metrics/ParameterLists:

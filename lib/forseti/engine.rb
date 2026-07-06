@@ -35,9 +35,10 @@ module Forseti
         Forseti::Privacy::LogRedactor.install(Rails.logger)
       end
 
-      # Fail fast on impossible sink configs (e.g. :active_record without
-      # Active Record) — a misconfigured audit trail should not boot quietly.
+      # Fail fast on impossible Persist-tier configs (ADR 000, D2) — a
+      # misconfigured audit trail or consent store should not boot quietly.
       Forseti::Audit.verify_sinks! if Forseti.config.audit.enabled?
+      Forseti::Consent.verify! if Forseti.config.consent.enabled?
     end
   end
 end

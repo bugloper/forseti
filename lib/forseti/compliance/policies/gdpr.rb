@@ -26,7 +26,21 @@ module Forseti
 
             p.requirement :consent_management,
                           article: "Art. 7",
-                          title: "Consent is collected, stored, and withdrawable where relied upon"
+                          title: "Consent is collected, stored, and withdrawable where relied upon",
+                          verify: -> { Forseti.config.consent.enabled? },
+                          evidence: "config.consent.enabled?",
+                          or_attested: true,
+                          remediation: "Enable config.consent.enable! and record consent through " \
+                                       "Forseti::Consent, or attest to your external consent system."
+
+            p.requirement :storage_limitation,
+                          article: "Art. 5(1)(e)",
+                          title: "Personal data is kept no longer than its purpose requires",
+                          verify: -> { Forseti.config.retention.policies.any? },
+                          evidence: "retention policies declared",
+                          or_attested: true,
+                          remediation: "Declare config.retention.policy(...) rules and schedule " \
+                                       "bin/rails forseti:retention:run, or attest to your external process."
 
             p.requirement :security_of_processing,
                           article: "Art. 32",
