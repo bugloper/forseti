@@ -1,0 +1,64 @@
+plugins:
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 3.2
+  SuggestExtensions: false
+  TargetRailsVersion: 7.1
+  NewCops: enable
+  Exclude:
+    - gemfiles/**/*
+    - spec/dummy/**/*
+    - vendor/**/*
+
+# Public API documentation is enforced via YARD review, not this cop.
+Style/Documentation:
+  Enabled: false
+
+# validate! returning true is the Rails idiom (ActiveModel#validate!).
+Naming/PredicateMethod:
+  AllowedMethods:
+    - validate!
+
+RSpec/DescribeClass:
+  Exclude:
+    - spec/forseti/zeitwerk_spec.rb
+    - spec/forseti/scanner/checks_spec.rb
+    - spec/forseti/tasks_spec.rb
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+    - "*.gemspec"
+    - Appraisals
+    - lib/forseti/tasks.rb
+
+Metrics/MethodLength:
+  Max: 15
+  Exclude:
+    - spec/**/*
+
+Metrics/AbcSize:
+  Max: 22
+  Exclude:
+    - spec/**/*
+
+# Rake tasks are a CLI: stdout and exit codes are their interface.
+Rails/Output:
+  Exclude:
+    - lib/forseti/tasks.rb
+
+Rails/Exit:
+  Exclude:
+    - lib/forseti/tasks.rb
+
+RSpec/ExampleLength:
+  Max: 10
+
+RSpec/MultipleExpectations:
+  Max: 4

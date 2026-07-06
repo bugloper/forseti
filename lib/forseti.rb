@@ -1,0 +1,84 @@
+# frozen_string_literal: true
+
+require "active_support"
+require "active_support/core_ext/enumerable"
+require "active_support/core_ext/module/delegation"
+require "active_support/core_ext/object/blank"
+require "zeitwerk"
+
+require_relative "forseti/version"
+
+loader = Zeitwerk::Loader.for_gem
+loader.inflector.inflect(
+  "cli" => "CLI",
+  "csp" => "CSP",
+  "csp_nonce" => "CSPNonce",
+  "hsts" => "HSTS",
+  "json" => "JSON",
+  "pii" => "PII",
+  "tty" => "TTY"
+)
+loader.ignore("#{__dir__}/forseti/version.rb")
+loader.ignore("#{__dir__}/forseti/engine.rb")
+loader.ignore("#{__dir__}/forseti/tasks.rb")
+loader.setup
+
+# Forseti is a security and compliance framework for Ruby on Rails.
+#
+# Applications configure it from an initializer:
+#
+#   Forseti.configure do |config|
+#     config.defaults = "1.0"
+#   end
+module Forseti
+  # Raised for any Forseti-specific failure. All Forseti errors inherit from
+  # this class so applications can rescue the whole family at once.
+  class Error < StandardError; end
+
+  # Raised when Forseti is configured with invalid or unknown values.
+  class ConfigurationError < Error; end
+
+  # Raised when reading or writing a setting that a configuration object does
+  # not declare. The message lists the valid alternatives.
+  class UnknownSettingError < ConfigurationError; end
+
+  # Raised when a declared setting is assigned a value outside its allowed
+  # values or type.
+  class InvalidSettingError < ConfigurationError; end
+
+  class << self
+    # The global configuration. Prefer {.configure} for writing.
+    #
+    # @return [Forseti::Configuration]
+    def config
+      @config ||= Configuration.new
+    end
+
+    # Yields the global configuration and validates it afterwards.
+    #
+    #   Forseti.configure do |config|
+    #     config.defaults = "1.0"
+    #   end
+    #
+    # @yieldparam config [Forseti::Configuration]
+    # @return [Forseti::Configuration]
+    def configure
+      yield config if block_given?
+      config.validate!
+      config
+    end
+
+    # Discards the global configuration. Intended for test suites.
+    #
+    # @return [void]
+    def reset_configuration!
+      @config = nil
+    end
+  end
+end
+
+# Module configurations are registered as constant names so that referencing
+# `Forseti.config.scanner` autoloads the module lazily (ADR 000, D1).
+Forseti::Configuration.register_module(:scanner, "Forseti::Scanner::Config")
+
+require_relative "forseti/engine" if defined?(Rails::Engine)

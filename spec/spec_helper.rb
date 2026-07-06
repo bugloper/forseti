@@ -1,0 +1,25 @@
+# frozen_string_literal: true
+
+ENV["RAILS_ENV"] ||= "test"
+
+require_relative "dummy/config/environment"
+require "rspec/rails"
+
+Dir[File.join(__dir__, "support", "**", "*.rb")].each { |file| require file }
+
+RSpec.configure do |config|
+  config.disable_monkey_patching!
+  config.order = :random
+  Kernel.srand config.seed
+
+  config.expect_with :rspec do |expectations|
+    expectations.include_chain_clauses_in_custom_matcher_descriptions = true
+  end
+
+  config.mock_with :rspec do |mocks|
+    mocks.verify_partial_doubles = true
+  end
+
+  # Forseti keeps global configuration state; isolate every example.
+  config.after { Forseti.reset_configuration! }
+end
