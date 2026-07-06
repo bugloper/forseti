@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 4 — Audit module (ADR 004): `Forseti::Audit.record` with ambient
+  per-request context (`Forseti::Audit::Current` + opt-in controller
+  concern), immutable events, PII-filtered metadata, and sink-first delivery
+  (`:active_record` append-only table via `rails g forseti:audit`, `:logger`
+  JSON lines, or any `#write(event)` object). Sink failures are isolated
+  (`on_sink_error: :report`/`:raise`); every event instruments
+  `audit.forseti`.
+- `audit.storage` scanner check: catches a missing forseti_audit_events
+  table before the trail silently drops events.
+- Persist-tier test harness: `rake spec:ar` runs `spec/ar/` with standalone
+  Active Record + in-memory SQLite on top of the AR-less dummy app.
+
 - Phase 3 — PII registry & Privacy module (ADR 003): `Forseti::PII` defines
   sensitive-data types once (10 built-ins, validator-backed value detection:
   Luhn, IBAN mod-97, IPv4 octets) and is app-extensible via

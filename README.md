@@ -137,12 +137,38 @@ the leak no parameter filter can catch — reporting via the
 `[REDACTED:email]`. Redaction fails open: a redactor error can never eat a
 log line.
 
+## Audit trail
+
+```bash
+bin/rails generate forseti:audit && bin/rails db:migrate
+```
+
+```ruby
+Forseti.configure { |config| config.audit.enable! }
+
+class ApplicationController < ActionController::Base
+  include Forseti::Audit::Controller   # fills actor/ip/request context per request
+end
+
+Forseti::Audit.record(:role_changed, actor: admin, subject: user,
+                      metadata: { from: "member", to: "admin" })
+```
+
+Events land in an append-only `forseti_audit_events` table (updates and
+destroys raise) — or in any sink you like: `:logger` emits single-line JSON
+with zero database, and custom sinks are any object with `#write(event)`.
+Metadata is filtered through the PII registry before storage, so the audit
+trail can't become a PII dump. Sink failures are isolated and reported via
+`Rails.error` by default (`config.audit.on_sink_error = :raise` to fail
+closed), every event also fires the `audit.forseti` notification, and the
+`audit.storage` doctor check catches a pending migration before your trail
+silently drops events.
+
 Planned for later phases:
 
 ```ruby
 Forseti.configure do |config|
   config.compliance.enable :gdpr
-  config.audit.enable!
 end
 ```
 
@@ -154,8 +180,8 @@ end
 | 1 | Scanner, Reporting, `forseti:doctor` (13 checks) | ✅ done |
 | 2 | Security module (headers, baseline CSP) + `forseti:install` | ✅ done |
 | 3 | PII registry, Privacy (filtering, redaction) | ✅ done |
-| 4 | Audit trail | 🔜 next |
-| 5 | Compliance engine (GDPR, then CCPA/LGPD/DPDP) | planned |
+| 4 | Audit trail (sinks, append-only storage, `forseti:audit`) | ✅ done |
+| 5 | Compliance engine (GDPR, then CCPA/LGPD/DPDP) | 🔜 next |
 | 6 | Consent & Retention | planned |
 
 ## Requirements

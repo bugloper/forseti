@@ -40,6 +40,21 @@ Forseti.configure do |config|
   #
   # config.privacy.log_redaction_mode = :enforce
   # config.privacy.redact_types = %i[email credit_card ssn iban]
+
+  # == Audit ===================================================================
+  # Durable, append-only trail of security events. Requires storage first:
+  # `bin/rails generate forseti:audit && bin/rails db:migrate` (or use the
+  # database-free :logger sink).
+  #
+  # config.audit.enable!
+  # config.audit.sinks = [:active_record]     # and/or :logger, or any #write(event)
+  # config.audit.on_sink_error = :report      # :raise to fail closed
+  #
+  # Then record events anywhere:
+  #   Forseti::Audit.record(:role_changed, actor: admin, subject: user,
+  #                         metadata: { from: "member", to: "admin" })
+  # and include Forseti::Audit::Controller in ApplicationController to fill
+  # actor/ip/request context automatically.
 end
 
 # Teach every Forseti layer about domain-specific PII at once (filtering,

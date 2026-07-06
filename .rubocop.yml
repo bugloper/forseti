@@ -10,8 +10,15 @@ AllCops:
   NewCops: enable
   Exclude:
     - gemfiles/**/*
+    - lib/generators/**/templates/**/* # ERB, not valid Ruby
     - spec/dummy/**/*
     - vendor/**/*
+
+# The engine can't assume the host app's ApplicationRecord exists.
+Rails/ApplicationRecord:
+  Exclude:
+    - app/models/**/*
+    - spec/ar/**/*
 
 # Public API documentation is enforced via YARD review, not this cop.
 Style/Documentation:
@@ -24,10 +31,15 @@ Naming/PredicateMethod:
 
 RSpec/DescribeClass:
   Exclude:
+    - spec/ar/**/*
     - spec/forseti/zeitwerk_spec.rb
     - spec/forseti/scanner/checks_spec.rb
     - spec/forseti/scanner/checks_awareness_spec.rb
     - spec/forseti/tasks_spec.rb
+
+RSpec/SpecFilePathFormat:
+  Exclude:
+    - spec/ar/**/*
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes

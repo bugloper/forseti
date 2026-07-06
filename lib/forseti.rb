@@ -32,6 +32,19 @@ loader.setup
 #     config.defaults = "1.0"
 #   end
 module Forseti
+  class << self
+    # The gem's Zeitwerk loader. Internal; used by Forseti.eager_load!.
+    attr_accessor :loader
+  end
+
+  # Eager loads the gem's own code (not the engine's app/ directory, which
+  # belongs to the host app's autoloader and may require Active Record).
+  #
+  # @return [void]
+  def self.eager_load!
+    loader.eager_load
+  end
+
   # Raised for any Forseti-specific failure. All Forseti errors inherit from
   # this class so applications can rescue the whole family at once.
   class Error < StandardError; end
@@ -83,5 +96,8 @@ end
 Forseti::Configuration.register_module(:scanner, "Forseti::Scanner::Config")
 Forseti::Configuration.register_module(:security, "Forseti::Security::Config")
 Forseti::Configuration.register_module(:privacy, "Forseti::Privacy::Config")
+Forseti::Configuration.register_module(:audit, "Forseti::Audit::Config")
+
+Forseti.loader = loader
 
 require_relative "forseti/engine" if defined?(Rails::Engine)

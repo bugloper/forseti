@@ -4,7 +4,17 @@ require "bundler/gem_tasks"
 require "rspec/core/rake_task"
 require "rubocop/rake_task"
 
-RSpec::Core::RakeTask.new(:spec)
+# Two suites, one process each (ADR 004 §7): the main suite proves the gem
+# works without Active Record; spec:ar loads AR standalone for Persist-tier
+# specs.
+RSpec::Core::RakeTask.new(:spec) do |task|
+  task.exclude_pattern = "spec/ar/**/*_spec.rb"
+end
+RSpec::Core::RakeTask.new("spec:ar") do |task|
+  task.rspec_opts = "--options .rspec-ar"
+  task.pattern = "spec/ar/**/*_spec.rb"
+end
+
 RuboCop::RakeTask.new
 
-task default: %i[spec rubocop]
+task default: ["spec", "spec:ar", "rubocop"]

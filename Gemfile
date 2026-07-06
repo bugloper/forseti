@@ -13,3 +13,7 @@ gem "rubocop", "~> 1.75"
 gem "rubocop-performance", "~> 1.24"
 gem "rubocop-rails", "~> 2.30"
 gem "rubocop-rspec", "~> 3.5"
+# For the spec:ar suite only — the gem itself never depends on Active Record
+# (ADR 000 D2). Appraisals pin sqlite3 per Rails version (7.1 caps at 1.x).
+gem "activerecord", ">= 7.1"
+gem "sqlite3", ">= 1.7"

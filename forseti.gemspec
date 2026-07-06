@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.metadata["bug_tracker_uri"] = "#{spec.homepage}/issues"
   spec.metadata["rubygems_mfa_required"] = "true"
 
-  spec.files = Dir["lib/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md"]
+  spec.files = Dir["app/**/*", "lib/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md"]
   spec.require_paths = ["lib"]
 
   # Hard dependencies are deliberately minimal (ADR 000, D2): Active Record is

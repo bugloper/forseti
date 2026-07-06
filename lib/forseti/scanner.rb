@@ -40,8 +40,9 @@ module Forseti
 
       private
 
-      def built_in_checks
+      def built_in_checks # rubocop:disable Metrics/MethodLength -- a plain list
         [
+          Checks::AuditStorage,
           Checks::LoadDefaults,
           Checks::ForceSsl,
           Checks::HSTS,
