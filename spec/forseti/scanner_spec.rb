@@ -101,26 +101,31 @@ RSpec.describe Forseti::Scanner do
         expect(results.first.message).to include("kaput")
       end
 
-      it "skips production-only checks outside production-like envs" do
+      it "skips production-only checks outside production-like envs, marked :environment" do
         check = build_check(check_id: "custom.prod", production_only: true) { pass("ok") }
+        result = run([check], env: "development").first
 
-        expect(run([check], env: "development").first).to be_skipped
+        expect(result).to be_skipped
+        expect(result.skip_cause).to eq(:environment)
         expect(run([check], env: "staging").first).to be_passed
       end
 
-      it "skips checks that do not apply" do
+      it "skips checks that do not apply, marked :not_applicable" do
         check = build_check(check_id: "custom.na", applies: false) { pass("ok") }
+        result = run([check]).first
 
-        expect(run([check]).first).to be_skipped
+        expect(result).to be_skipped
+        expect(result.skip_cause).to eq(:not_applicable)
       end
 
-      it "skips checks listed in scanner.skip_checks" do
+      it "skips checks listed in scanner.skip_checks, marked :config" do
         check = build_check(check_id: "custom.skipme") { pass("ok") }
         Forseti.config.scanner.skip_checks = ["custom.skipme"]
 
         result = run([check]).first
 
         expect(result).to be_skipped
+        expect(result.skip_cause).to eq(:config)
         expect(result.message).to include("skip_checks")
       end
     end

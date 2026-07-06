@@ -40,6 +40,27 @@ RSpec.describe "forseti rake tasks" do
     expect(status).to eq(1)
   end
 
+  it "compliance explains itself when no policies are enabled" do
+    output = capture_stdout { Rake::Task["forseti:compliance"].invoke }
+
+    expect(output).to include("No compliance policies enabled")
+    expect(output).to include("gdpr")
+  end
+
+  it "compliance reports enabled policies and exits non-zero on unmet requirements" do
+    Forseti.config.compliance.enable(:gdpr)
+
+    status = nil
+    expect do
+      Rake::Task["forseti:compliance"].invoke
+    rescue SystemExit => e
+      status = e.status
+    end.to output(/unmet requirements present/).to_stderr
+                                               .and output(/General Data Protection Regulation.*#{Regexp.escape(Forseti::Compliance::DISCLAIMER)}/mo).to_stdout
+
+    expect(status).to eq(1)
+  end
+
   it "doctor succeeds when fail_on is above the worst failure" do
     Forseti.config.scanner.fail_on = :critical
 

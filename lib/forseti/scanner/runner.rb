@@ -28,14 +28,16 @@ module Forseti
       attr_reader :context, :config
 
       def run_check(check_class)
-        return Result.skipped(check_class, "Skipped by scanner.skip_checks") if skipped_by_config?(check_class)
+        if skipped_by_config?(check_class)
+          return Result.skipped(check_class, "Skipped by scanner.skip_checks", cause: :config)
+        end
 
         if check_class.production_only? && !context.production_like?
-          return Result.skipped(check_class, PRODUCTION_ONLY_REASON)
+          return Result.skipped(check_class, PRODUCTION_ONLY_REASON, cause: :environment)
         end
 
         check = check_class.new(context)
-        return Result.skipped(check_class, check.not_applicable_reason) unless check.applies?
+        return Result.skipped(check_class, check.not_applicable_reason, cause: :not_applicable) unless check.applies?
 
         check.call
       rescue StandardError => e

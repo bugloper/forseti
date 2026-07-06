@@ -50,6 +50,7 @@ Metrics/BlockLength:
     - "*.gemspec"
     - Appraisals
     - lib/forseti/tasks.rb
+    - lib/forseti/compliance/policies/**/* # declarations, not logic
 
 Metrics/MethodLength:
   Max: 15

@@ -164,13 +164,33 @@ closed), every event also fires the `audit.forseti` notification, and the
 `audit.storage` doctor check catches a pending migration before your trail
 silently drops events.
 
-Planned for later phases:
+## Compliance
 
 ```ruby
 Forseti.configure do |config|
-  config.compliance.enable :gdpr
+  config.compliance.enable :gdpr    # also :ccpa, :lgpd, :dpdp
 end
 ```
+
+```bash
+bin/rails generate forseti:compliance    # attestations.yml skeleton
+bin/rails forseti:compliance             # per-policy report; exit 1 on unmet
+```
+
+Each policy is a set of requirements mapped to legal controls. Requirements
+Forseti can machine-verify (transport security → GDPR Art. 32, PII-free logs
+→ Art. 5(1)(c), an audit trail → Art. 33) are evaluated against the live app
+via the scanner. Everything else — DPAs, notices, officers — is satisfied
+**only** by an explicit human attestation in `config/forseti/attestations.yml`
+(who, when, optional expiry), reviewed in git like code. Reports always
+distinguish `[verified]` from `[attested by jane@corp.com on 2026-07-01]`,
+and requirements whose evidence couldn't run report as *unverified*, never as
+passing. Custom org policies plug into the same engine via
+`Forseti::Compliance.define_policy`.
+
+> **Forseti provides technical evidence and checklists, not legal advice.**
+> A passing report does not constitute or guarantee regulatory compliance.
+> That disclaimer is part of every report, by design.
 
 ## Roadmap
 
@@ -181,8 +201,8 @@ end
 | 2 | Security module (headers, baseline CSP) + `forseti:install` | ✅ done |
 | 3 | PII registry, Privacy (filtering, redaction) | ✅ done |
 | 4 | Audit trail (sinks, append-only storage, `forseti:audit`) | ✅ done |
-| 5 | Compliance engine (GDPR, then CCPA/LGPD/DPDP) | 🔜 next |
-| 6 | Consent & Retention | planned |
+| 5 | Compliance engine (GDPR, CCPA, LGPD, DPDP + attestations) | ✅ done |
+| 6 | Consent & Retention | 🔜 next |
 
 ## Requirements
 

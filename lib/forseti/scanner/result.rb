@@ -16,8 +16,14 @@ module Forseti
       attr_reader :details
       # @return [Exception, nil] present on :error results
       attr_reader :error
+      # @return [Symbol, nil] on :skipped results: :not_applicable (the check
+      #   is moot for this app), :environment (couldn't run here — e.g.
+      #   production-only in development), or :config (scanner.skip_checks).
+      #   Compliance treats :not_applicable as neutral, the others as
+      #   unverifiable (ADR 005 §7).
+      attr_reader :skip_cause
 
-      def initialize(check:, status:, message: nil, details: [], error: nil)
+      def initialize(check:, status:, message: nil, details: [], error: nil, skip_cause: nil)
         unless STATUSES.include?(status)
           raise ArgumentError, "Unknown result status #{status.inspect}. Statuses: #{STATUSES.join(', ')}"
         end
@@ -27,6 +33,7 @@ module Forseti
         @message = message
         @details = Array(details)
         @error = error
+        @skip_cause = skip_cause
       end
 
       # Builds an :error result from a check that raised (ADR 001 §7, error
@@ -36,8 +43,8 @@ module Forseti
             error: exception)
       end
 
-      def self.skipped(check, reason)
-        new(check: check, status: :skipped, message: reason)
+      def self.skipped(check, reason, cause: :not_applicable)
+        new(check: check, status: :skipped, message: reason, skip_cause: cause)
       end
 
       def passed? = status == :passed

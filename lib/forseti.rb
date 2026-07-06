@@ -10,13 +10,18 @@ require_relative "forseti/version"
 
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect(
+  "ccpa" => "CCPA",
   "cli" => "CLI",
   "csp" => "CSP",
   "csp_nonce" => "CSPNonce",
+  "dpdp" => "DPDP",
+  "gdpr" => "GDPR",
   "hsts" => "HSTS",
   "json" => "JSON",
+  "lgpd" => "LGPD",
   "pii" => "PII",
-  "tty" => "TTY"
+  "tty" => "TTY",
+  "tty_formatter" => "TTYFormatter"
 )
 loader.ignore("#{__dir__}/forseti/version.rb")
 loader.ignore("#{__dir__}/forseti/engine.rb")
@@ -97,6 +102,7 @@ Forseti::Configuration.register_module(:scanner, "Forseti::Scanner::Config")
 Forseti::Configuration.register_module(:security, "Forseti::Security::Config")
 Forseti::Configuration.register_module(:privacy, "Forseti::Privacy::Config")
 Forseti::Configuration.register_module(:audit, "Forseti::Audit::Config")
+Forseti::Configuration.register_module(:compliance, "Forseti::Compliance::Config")
 
 Forseti.loader = loader
 

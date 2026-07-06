@@ -55,6 +55,17 @@ Forseti.configure do |config|
   #                         metadata: { from: "member", to: "admin" })
   # and include Forseti::Audit::Controller in ApplicationController to fill
   # actor/ip/request context automatically.
+
+  # == Compliance ==============================================================
+  # Map your posture to regulations. Machine-checkable requirements are
+  # verified against the live app; everything else needs an explicit human
+  # attestation (generate the file with `rails g forseti:compliance`).
+  # Report with `bin/rails forseti:compliance` (FORMAT=json for CI).
+  #
+  # config.compliance.enable :gdpr    # also: :ccpa, :lgpd, :dpdp
+  #
+  # Forseti provides technical evidence, not legal advice — a passing report
+  # does not constitute or guarantee regulatory compliance.
 end
 
 # Teach every Forseti layer about domain-specific PII at once (filtering,

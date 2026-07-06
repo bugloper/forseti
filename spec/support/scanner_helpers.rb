@@ -64,5 +64,6 @@ RSpec.configure do |config|
   config.after do
     Forseti::Scanner.reset_registry!
     Forseti::PII.reset_registry!
+    Forseti::Compliance.reset_registry!
   end
 end
