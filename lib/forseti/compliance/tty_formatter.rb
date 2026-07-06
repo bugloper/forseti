@@ -6,12 +6,10 @@ module Forseti
     # visibly differently from machine-verified ones (ADR 005 §7), and the
     # disclaimer is part of the output contract.
     class TTYFormatter
-      COLORS = { red: 31, green: 32, yellow: 33, cyan: 36, dim: 2, bold: 1 }.freeze
-
       # @param results [Array<Forseti::Compliance::PolicyResult>]
       def initialize(results, color: nil)
         @results = results
-        @color = color.nil? ? $stdout.tty? && ENV["NO_COLOR"].nil? : color
+        @color = color.nil? ? Reporting::ANSI.auto? : color
       end
 
       # @return [String]
@@ -66,9 +64,7 @@ module Forseti
       end
 
       def paint(text, color)
-        return text unless @color
-
-        "\e[#{COLORS.fetch(color)}m#{text}\e[0m"
+        Reporting::ANSI.paint(text, color, enabled: @color)
       end
     end
   end

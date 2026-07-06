@@ -7,13 +7,11 @@ module Forseti
       # first with remediation; passes, skips, and errors follow. Color is
       # dropped for non-TTY output and when NO_COLOR is set.
       class TTY
-        COLORS = { red: 31, green: 32, yellow: 33, cyan: 36, dim: 2, bold: 1 }.freeze
-
         # @param report [Forseti::Reporting::Report]
         # @param color [Boolean, nil] override auto-detection
         def initialize(report, color: nil)
           @report = report
-          @color = color.nil? ? auto_color? : color
+          @color = color.nil? ? ANSI.auto? : color
         end
 
         # @return [String]
@@ -39,8 +37,9 @@ module Forseti
         end
 
         def failure_lines(result)
+          severity_tag = ANSI.severity_tag(result.severity, enabled: @color)
           [
-            "  #{paint('✖', :red)} #{result.id.ljust(32)} #{result.message} #{paint("[#{result.severity}]", :red)}",
+            "  #{paint('✖', :red)} #{result.id.ljust(32)} #{result.message} #{severity_tag}",
             *result.details.map { |detail| "      #{paint('•', :dim)} #{detail}" },
             "      #{paint('↳', :cyan)} #{result.check.remediation}"
           ]
@@ -91,13 +90,7 @@ module Forseti
         end
 
         def paint(text, color)
-          return text unless @color
-
-          "\e[#{COLORS.fetch(color)}m#{text}\e[0m"
-        end
-
-        def auto_color?
-          $stdout.tty? && ENV["NO_COLOR"].nil?
+          ANSI.paint(text, color, enabled: @color)
         end
       end
     end

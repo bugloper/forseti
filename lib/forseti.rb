@@ -12,6 +12,7 @@ require_relative "forseti/version"
 
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect(
+  "ansi" => "ANSI",
   "ccpa" => "CCPA",
   "cli" => "CLI",
   "csp" => "CSP",

@@ -52,9 +52,12 @@ namespace :forseti do
 
   desc "List all registered scanner checks"
   task checks: :environment do
+    ansi = Forseti::Reporting::ANSI
     Forseti::Scanner.registry.checks.each do |check|
-      flags = check.production_only? ? " (production-only)" : ""
-      puts "#{check.id.ljust(32)} [#{check.severity}]#{flags} #{check.title}"
+      severity = ansi.paint("[#{check.severity}]".ljust(10),
+                            ansi::SEVERITY_COLORS.fetch(check.severity, :dim))
+      flags = check.production_only? ? ansi.paint("(production-only) ", :dim) : ""
+      puts "#{check.id.ljust(32)} #{severity} #{flags}#{check.title}"
     end
   end
 
