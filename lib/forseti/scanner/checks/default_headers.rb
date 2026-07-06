@@ -15,6 +15,9 @@ module Forseti
                     "config/application.rb."
 
         def call
+          return pass("Enforced by Forseti (security.headers_mode = :enforce)") if forseti_enforced?
+          return skip("Headers are managed by the secure_headers gem") if secure_headers_gem?
+
           headers = context.config.action_dispatch.default_headers || {}
           missing = REQUIRED - headers.keys
           # frame-ancestors is the modern replacement for X-Frame-Options.
@@ -28,6 +31,14 @@ module Forseti
         end
 
         private
+
+        def forseti_enforced?
+          Forseti.config.security.headers_mode == :enforce
+        end
+
+        def secure_headers_gem?
+          defined?(::SecureHeaders)
+        end
 
         def csp_covers_framing?
           directives = context.config.content_security_policy&.directives

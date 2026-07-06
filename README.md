@@ -64,6 +64,30 @@ in other environments.
 Reports describe what protections are *missing* — treat CI artifacts containing
 them as sensitive. They never contain secret values, only presence or absence.
 
+## One-line hardening
+
+```bash
+bin/rails generate forseti:install   # writes config/initializers/forseti.rb
+```
+
+```ruby
+Forseti.configure do |config|
+  config.defaults = "1.0"
+  config.security.enable!
+end
+```
+
+`security.enable!` fills missing security headers (X-Content-Type-Options,
+X-Frame-Options, Referrer-Policy, X-Permitted-Cross-Domain-Policies) on every
+response and adds a baseline Content-Security-Policy — in **report-only mode**
+— to HTML responses that have none. The contract is *fill, never override*: a
+header your app already sets, at any layer, always wins. When report-only
+looks clean in production, flip `config.security.csp_mode = :enforce`.
+
+Apps using the archived `secure_headers` gem are recognized: header checks
+step aside, and the scanner flags the classic `SecureHeaders::OPT_OUT`
+misconfiguration where a defined CSP is silently dead.
+
 ```ruby
 # config/initializers/forseti.rb
 Forseti.configure do |config|
@@ -86,12 +110,37 @@ end
 Forseti::Scanner.register(InternalAuthCheck)
 ```
 
+## PII protection
+
+```ruby
+Forseti.configure do |config|
+  config.privacy.enable!   # PII-driven parameter filtering + log redaction (report mode)
+end
+
+# Teach every layer — filtering, log redaction, scanner coverage — about
+# domain-specific PII at once:
+Forseti::PII.register(:employee_badge,
+                      sensitivity: :medium,
+                      key_patterns: [/badge (number|id)/],
+                      filter_keys: %i[badge_number])
+```
+
+The PII registry defines what "sensitive" means, once: 10 built-in types
+(email, phone, credit card, SSN, IBAN, IP, date of birth, password, API
+credentials, national ID) with validator-backed value detection — credit
+cards must pass Luhn, IBANs mod-97 — so a random 16-digit ID is never
+mangled. `enable!` extends `config.filter_parameters` with the registry's
+keys (never removing yours) and watches log lines for interpolated PII —
+the leak no parameter filter can catch — reporting via the
+`pii_detected.forseti` notification (type names only, never values). Flip
+`config.privacy.log_redaction_mode = :enforce` to replace matches with
+`[REDACTED:email]`. Redaction fails open: a redactor error can never eat a
+log line.
+
 Planned for later phases:
 
 ```ruby
 Forseti.configure do |config|
-  config.security.enable!
-  config.privacy.filter_parameters!
   config.compliance.enable :gdpr
   config.audit.enable!
 end
@@ -103,9 +152,9 @@ end
 |-------|-------------|--------|
 | 0 | Gem skeleton, configuration system, CI | ✅ done |
 | 1 | Scanner, Reporting, `forseti:doctor` (13 checks) | ✅ done |
-| 2 | Security module (headers, CSP, cookies, session) | 🔜 next |
-| 3 | PII registry, Privacy (filtering, redaction) | planned |
-| 4 | Audit trail | planned |
+| 2 | Security module (headers, baseline CSP) + `forseti:install` | ✅ done |
+| 3 | PII registry, Privacy (filtering, redaction) | ✅ done |
+| 4 | Audit trail | 🔜 next |
 | 5 | Compliance engine (GDPR, then CCPA/LGPD/DPDP) | planned |
 | 6 | Consent & Retention | planned |
 

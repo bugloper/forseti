@@ -26,6 +26,7 @@ RSpec/DescribeClass:
   Exclude:
     - spec/forseti/zeitwerk_spec.rb
     - spec/forseti/scanner/checks_spec.rb
+    - spec/forseti/scanner/checks_awareness_spec.rb
     - spec/forseti/tasks_spec.rb
 
 Style/StringLiterals:
@@ -47,6 +48,10 @@ Metrics/AbcSize:
   Max: 22
   Exclude:
     - spec/**/*
+
+# Keyword arguments are self-documenting; the count limit targets positional.
+Metrics/ParameterLists:
+  CountKeywordArgs: false
 
 # Rake tasks are a CLI: stdout and exit codes are their interface.
 Rails/Output:

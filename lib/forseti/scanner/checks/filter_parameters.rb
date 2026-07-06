@@ -6,8 +6,8 @@ module Forseti
       class FilterParameters < Check
         # Probed behaviorally through ActiveSupport::ParameterFilter — we test
         # what the filter actually redacts, not what the config array looks
-        # like (ADR 001 §7).
-        PROBES = %w[password password_confirmation secret token api_key access_key ssn cvv].freeze
+        # like (ADR 001 §7). Probe names come from the PII registry (ADR 003),
+        # so app-registered types with probes are checked too.
         FILTERED = "[FILTERED]"
 
         id          "privacy.filter_parameters"
@@ -37,7 +37,7 @@ module Forseti
 
         def probe(filters)
           filter = ActiveSupport::ParameterFilter.new(filters)
-          PROBES.reject { |key| filter.filter({ key => "probe" })[key] == FILTERED }
+          Forseti::PII.probe_keys.reject { |key| filter.filter({ key => "probe" })[key] == FILTERED }
         end
       end
     end

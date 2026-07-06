@@ -21,6 +21,7 @@ loader.inflector.inflect(
 loader.ignore("#{__dir__}/forseti/version.rb")
 loader.ignore("#{__dir__}/forseti/engine.rb")
 loader.ignore("#{__dir__}/forseti/tasks.rb")
+loader.ignore("#{__dir__}/generators")
 loader.setup
 
 # Forseti is a security and compliance framework for Ruby on Rails.
@@ -80,5 +81,7 @@ end
 # Module configurations are registered as constant names so that referencing
 # `Forseti.config.scanner` autoloads the module lazily (ADR 000, D1).
 Forseti::Configuration.register_module(:scanner, "Forseti::Scanner::Config")
+Forseti::Configuration.register_module(:security, "Forseti::Security::Config")
+Forseti::Configuration.register_module(:privacy, "Forseti::Privacy::Config")
 
 require_relative "forseti/engine" if defined?(Rails::Engine)

@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 3 — PII registry & Privacy module (ADR 003): `Forseti::PII` defines
+  sensitive-data types once (10 built-ins, validator-backed value detection:
+  Luhn, IBAN mod-97, IPv4 octets) and is app-extensible via
+  `Forseti::PII.register`. `config.privacy.enable!` extends
+  `config.filter_parameters` from the registry (union, never removes) and
+  adds fail-open log redaction with `:report`/`:enforce` modes and the
+  `pii_detected.forseti` notification (never carries matched values).
+- The `privacy.filter_parameters` scanner check now probes registry-defined
+  types, including app-registered ones.
+
+- Phase 2 — Security module (ADR 002): `config.security.enable!` fills missing
+  security headers via response middleware (fill-only, never overrides) and
+  applies a baseline CSP in report-only or enforcing mode; `forseti:install`
+  generator.
+- Scanner awareness of header managers: checks recognize Forseti's own
+  enforcement and the `secure_headers` gem, including detection of the
+  `SecureHeaders::OPT_OUT` dead-configuration footgun.
+
 - Phase 1 — Scanner & Reporting (ADR 001): 13 built-in configuration-posture
   checks, `Forseti::Scanner::Check` base class for custom checks, severity
   model, error-isolated runner, and environment-honest skipping.

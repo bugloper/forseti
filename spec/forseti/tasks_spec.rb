@@ -30,11 +30,14 @@ RSpec.describe "forseti rake tasks" do
 
   it "doctor exits non-zero when failures reach fail_on" do
     # The dummy app fails security.csp (:high), the default threshold.
-    output = nil
+    status = nil
     expect do
-      output = capture_stdout { Rake::Task["forseti:doctor"].invoke }
-    end.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
-    expect(output).to be_nil # exit happened before capture returned
+      Rake::Task["forseti:doctor"].invoke
+    rescue SystemExit => e
+      status = e.status
+    end.to output(/forseti:doctor failed/).to_stderr.and output(/Forseti Doctor/).to_stdout
+
+    expect(status).to eq(1)
   end
 
   it "doctor succeeds when fail_on is above the worst failure" do

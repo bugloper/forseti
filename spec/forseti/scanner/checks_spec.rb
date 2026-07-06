@@ -273,6 +273,14 @@ RSpec.describe "Built-in checks" do
       expect(result).to be_failed
       expect(result.details.join).to include("ssn")
     end
+
+    it "probes app-registered PII types too" do
+      Forseti::PII.register(:employee_badge, sensitivity: :medium, probes: %w[badge_number])
+      result = run_check(described_class)
+
+      expect(result).to be_failed
+      expect(result.details.join).to include("badge_number")
+    end
   end
 
   describe Forseti::Scanner::Checks::LogLevel do

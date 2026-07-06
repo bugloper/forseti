@@ -61,5 +61,8 @@ end
 
 RSpec.configure do |config|
   config.include ScannerHelpers
-  config.after { Forseti::Scanner.reset_registry! }
+  config.after do
+    Forseti::Scanner.reset_registry!
+    Forseti::PII.reset_registry!
+  end
 end
