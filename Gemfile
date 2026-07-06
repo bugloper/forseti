@@ -17,3 +17,9 @@ gem "rubocop-rspec", "~> 3.5"
 # (ADR 000 D2). Appraisals pin sqlite3 per Rails version (7.1 caps at 1.x).
 gem "activerecord", ">= 7.1"
 gem "sqlite3", ">= 1.7"
+
+# For the spec:integrations suite only — Forseti detects the (archived)
+# secure_headers gem at runtime but never depends on it (ADR 002 §5). This
+# dev dependency lets the introspection contract be tested against the real
+# gem instead of stubs (the get-vs-dup API guess already bit us once).
+gem "secure_headers", ">= 6.5"

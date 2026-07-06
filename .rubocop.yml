@@ -32,6 +32,7 @@ Naming/PredicateMethod:
 RSpec/DescribeClass:
   Exclude:
     - spec/ar/**/*
+    - spec/integrations/**/*
     - spec/forseti/consent_config_spec.rb
     - spec/forseti/zeitwerk_spec.rb
     - spec/forseti/scanner/checks_spec.rb

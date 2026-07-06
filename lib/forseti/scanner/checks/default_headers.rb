@@ -16,7 +16,7 @@ module Forseti
 
         def call
           return pass("Enforced by Forseti (security.headers_mode = :enforce)") if forseti_enforced?
-          return skip("Headers are managed by the secure_headers gem") if secure_headers_gem?
+          return skip("Headers are managed by the secure_headers gem", cause: :not_applicable) if secure_headers_gem?
 
           headers = context.config.action_dispatch.default_headers || {}
           missing = REQUIRED - headers.keys

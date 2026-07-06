@@ -8,13 +8,19 @@ require "rubocop/rake_task"
 # works without Active Record; spec:ar loads AR standalone for Persist-tier
 # specs.
 RSpec::Core::RakeTask.new(:spec) do |task|
-  task.exclude_pattern = "spec/ar/**/*_spec.rb"
+  task.exclude_pattern = "spec/ar/**/*_spec.rb,spec/integrations/**/*_spec.rb"
 end
 RSpec::Core::RakeTask.new("spec:ar") do |task|
   task.rspec_opts = "--options .rspec-ar"
   task.pattern = "spec/ar/**/*_spec.rb"
 end
+# Optional third-party gems Forseti detects (secure_headers, ...) — real gems,
+# isolated so the main suite's "gem not present" paths still run.
+RSpec::Core::RakeTask.new("spec:integrations") do |task|
+  task.rspec_opts = "--options .rspec-integrations"
+  task.pattern = "spec/integrations/**/*_spec.rb"
+end
 
 RuboCop::RakeTask.new
 
-task default: ["spec", "spec:ar", "rubocop"]
+task default: ["spec", "spec:ar", "spec:integrations", "rubocop"]

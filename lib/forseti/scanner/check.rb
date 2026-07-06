@@ -99,8 +99,12 @@ module Forseti
         Result.new(check: self.class, status: :failed, message: message, details: details)
       end
 
-      def skip(reason)
-        Result.new(check: self.class, status: :skipped, message: reason)
+      # @param cause [Symbol, nil] :not_applicable marks the skip as neutral
+      #   evidence for compliance evaluation (the check is moot for this app);
+      #   nil means "couldn't determine", which compliance treats as
+      #   unverifiable (ADR 005 §7).
+      def skip(reason, cause: nil)
+        Result.new(check: self.class, status: :skipped, message: reason, skip_cause: cause)
       end
     end
   end

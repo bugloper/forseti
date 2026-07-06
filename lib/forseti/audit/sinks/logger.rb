@@ -11,7 +11,7 @@ module Forseti
       class Logger
         # @param logger [::Logger, nil] defaults to Rails.logger at write time
         def initialize(logger = nil)
-          @logger = logger
+          @logger             = logger
         end
 
         # @param event [Forseti::Audit::Event]

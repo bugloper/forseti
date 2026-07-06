@@ -22,7 +22,7 @@ module Forseti
         Current.ip_address = request.remote_ip
         Current.user_agent = request.user_agent
         Current.request_id = request.request_id
-        Current.actor = forseti_audit_actor
+        Current.actor      = forseti_audit_actor
       end
 
       def forseti_audit_actor
